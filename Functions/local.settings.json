@@ -1,0 +1,13 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "FUNCTIONS_WORKER_RUNTIME": "dotnet",
+    "horaazurecosmosdb_DOCUMENTDB": "{FullCosmosDBEndPoint}",
+    "endpointUrl": "{EndPointCosmosDBJustUrl}",
+    "primaryKey": "{CosmosDBPrimaryKey}",
+    "MyEventGridTopicUriSetting": "{EventGridUriForEvents}",
+    "MyEventGridTopicKeySetting": "{EventGridTopicKey}"
+  },
+  "ConnectionStrings": {}
+}

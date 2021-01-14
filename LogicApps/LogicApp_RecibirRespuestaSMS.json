@@ -1,0 +1,118 @@
+{
+    "definition": {
+        "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+        "actions": {
+            "Parse_JSON": {
+                "inputs": {
+                    "content": "@first(body('Query_documents_V2')?['Documents'])",
+                    "schema": {
+                        "properties": {
+                            "_attachments": {
+                                "type": "string"
+                            },
+                            "_etag": {
+                                "type": "string"
+                            },
+                            "_rid": {
+                                "type": "string"
+                            },
+                            "_self": {
+                                "type": "string"
+                            },
+                            "_ts": {
+                                "type": "integer"
+                            },
+                            "ciudad": {
+                                "type": "string"
+                            },
+                            "id": {
+                                "type": "string"
+                            },
+                            "proximahora": {
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "runAfter": {
+                    "Query_documents_V2": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ParseJson"
+            },
+            "Query_documents_V2": {
+                "inputs": {
+                    "body": {
+                        "QueryText": "SELECT TOP 1 * FROM c WHERE c.ciudad = \"SANTIAGO\""
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['documentdb']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/v2/dbs/@{encodeURIComponent('Travellers')}/colls/@{encodeURIComponent('horasdisponibles')}/query"
+                },
+                "runAfter": {},
+                "type": "ApiConnection"
+            },
+            "Send_Text_Message_(SMS)": {
+                "inputs": {
+                    "body": {
+                        "body": "La proxima hora disponible para su examen COVID es: @{body('Parse_JSON')?['proximahora']}",
+                        "from": "56227125292",
+                        "to": "@{triggerFormDataValue('From')}"
+                    },
+                    "host": {
+                        "connection": {
+                            "name": "@parameters('$connections')['twilio']['connectionId']"
+                        }
+                    },
+                    "method": "post",
+                    "path": "/Messages.json"
+                },
+                "runAfter": {
+                    "Parse_JSON": [
+                        "Succeeded"
+                    ]
+                },
+                "type": "ApiConnection"
+            }
+        },
+        "contentVersion": "1.0.0.0",
+        "outputs": {},
+        "parameters": {
+            "$connections": {
+                "defaultValue": {},
+                "type": "Object"
+            }
+        },
+        "triggers": {
+            "manual": {
+                "inputs": {
+                    "schema": {}
+                },
+                "kind": "Http",
+                "type": "Request"
+            }
+        }
+    },
+    "parameters": {
+        "$connections": {
+            "value": {
+                "documentdb": {
+                    "connectionId": "/subscriptions/a9a22ce5-5534-40a0-98bb-1216c344e335/resourceGroups/HORA-AZURE/providers/Microsoft.Web/connections/documentdb",
+                    "connectionName": "documentdb",
+                    "id": "/subscriptions/a9a22ce5-5534-40a0-98bb-1216c344e335/providers/Microsoft.Web/locations/eastus/managedApis/documentdb"
+                },
+                "twilio": {
+                    "connectionId": "/subscriptions/a9a22ce5-5534-40a0-98bb-1216c344e335/resourceGroups/HORA-AZURE/providers/Microsoft.Web/connections/twilio",
+                    "connectionName": "twilio",
+                    "id": "/subscriptions/a9a22ce5-5534-40a0-98bb-1216c344e335/providers/Microsoft.Web/locations/eastus/managedApis/twilio"
+                }
+            }
+        }
+    }
+}
